@@ -1,3 +1,4 @@
+#mac OS XセットアップYAMLファイル
 - hosts: localhost
   connection: local
  
