@@ -1,0 +1,86 @@
+- hosts: localhost
+  connection: local
+ 
+  vars:
+    homebrew_taps:
+      - caskroom/cask
+      - caskroom/versions
+      - homebrew/dupes
+      - homebrew/versions
+      - homebrew/boneyard
+      - homebrew/binary
+ 
+    homebrew_cask_packages:
+      - name: iterm2
+      - name: alfred
+      - name: appcleaner
+      - name: atok
+      - name: kindle
+      - name: coteditor
+      - name: xquartz
+      - name: powershell
+      - name: simplenote
+      - name: tripmode
+      - name: evernote
+      - name: onyx
+      - name: clipy
+      - name: macvim
+      - name: libreoffice
+      - name: sublime-text
+      - name: java
+      - name: gimp
+      - name: skype
+      - name: anaconda
+ 
+    homebrew_packages:
+      - name: awscli
+      - name: wget
+      - name: openssl
+      - name: jq
+      - name: terraform
+      - name: ansible
+      - name: direnv
+      - name: git
+      - name: ricty
+      - name: readline
+      - name: pyenv
+      - name: pyenv-virtual
+      - name: python2
+      - name: xz
+      - name: python3
+      - name: terraform
+      - name: the_silver_searcher
+      - name: tig
+      - name: tmux
+      - name: zsh
+      - name: sqlite
+ 
+  tasks:
+    - name: Install homebrew
+      shell: |
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      args:
+        creates: /usr/local/bin/brew
+
+    - name: homebrew tap
+      homebrew_tap:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ homebrew_taps }}'
+        
+    - name: homebrew update
+      homebrew:
+        update_homebrew: yes
+
+    - name: homebrew cask packages install
+      homebrew_cask: name={{ item.name }} state=installed
+      # ※1 GUIツールをインストールする場所を `/Application` に固定
+      environment:
+        HOMEBREW_CASK_OPTS: "--appdir=/Applications"
+      with_items: '{{ homebrew_cask_packages }}'
+ 
+    - name: homebrew packages install
+      homebrew:
+        name: '{{ item.name }}'
+        state: '{{ item.state | default("present") }}'
+      with_items: '{{ homebrew_packages }}'
